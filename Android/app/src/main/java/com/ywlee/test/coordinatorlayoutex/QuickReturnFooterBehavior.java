@@ -5,8 +5,10 @@ import android.animation.TimeInterpolator;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.view.ViewCompat;
+import android.support.v4.view.animation.FastOutSlowInInterpolator;
 import android.view.View;
 import android.view.ViewPropertyAnimator;
+import android.view.animation.Interpolator;
 
 /**
  * @create 2018.08.17.
@@ -18,7 +20,7 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
     private int mDySinceDirectionChange;
     private boolean mHiding;
     private boolean mShowing;
-    private TimeInterpolator INTERPOLATOR;
+    private static final Interpolator INTERPOLATOR = new FastOutSlowInInterpolator();
 
     @Override
     public boolean onStartNestedScroll(@NonNull CoordinatorLayout coordinatorLayout,
@@ -68,6 +70,40 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
      * @param view View
      */
     private void showView(View view) {
+        mShowing = true;
+        ViewPropertyAnimator animator = view.animate()
+                .translationY(view.getHeight())
+                .setInterpolator(INTERPOLATOR)
+                .setDuration(200);
+
+        animator.setListener(new Animator.AnimatorListener() {
+
+            @Override
+            public void onAnimationStart(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                mHiding = false;
+                view.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+                // 취소되면 다시 보여준다.
+                mHiding = false;
+                if (!mShowing)
+                    showView(view);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        });
+
+        animator.start();
     }
 
     /**
