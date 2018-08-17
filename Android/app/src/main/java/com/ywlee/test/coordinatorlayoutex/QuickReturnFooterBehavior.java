@@ -1,9 +1,12 @@
 package com.ywlee.test.coordinatorlayoutex;
 
+import android.animation.Animator;
+import android.animation.TimeInterpolator;
 import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.view.ViewCompat;
 import android.view.View;
+import android.view.ViewPropertyAnimator;
 
 /**
  * @create 2018.08.17.
@@ -15,6 +18,7 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
     private int mDySinceDirectionChange;
     private boolean mHiding;
     private boolean mShowing;
+    private TimeInterpolator INTERPOLATOR;
 
     @Override
     public boolean onStartNestedScroll(@NonNull CoordinatorLayout coordinatorLayout,
@@ -61,17 +65,51 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
      * View 를 보임.
      * 아래에서 위로 슬라이딩 하는 애니메이션 후 보임
      *
-     * @param child View
+     * @param view View
      */
-    private void showView(View child) {
+    private void showView(View view) {
     }
 
     /**
      * View 를 숨김..
      * 아래로 슬라이딩 하는 액션 후 숨긴다.
      *
-     * @param child 숨길 뷰
+     * @param view 숨길 뷰
      */
-    private void hideView(View child) {
+    private void hideView(final View view) {
+        mHiding = true;
+        ViewPropertyAnimator animator = view.animate()
+                .translationY(view.getHeight())
+                .setInterpolator(INTERPOLATOR)
+                .setDuration(200);
+
+        animator.setListener(new Animator.AnimatorListener() {
+
+            @Override
+            public void onAnimationStart(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                mHiding = false;
+                view.setVisibility(View.VISIBLE);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+                // 취소되면 다시 보여준다.
+                mHiding = false;
+                if (!mShowing)
+                    showView(view);
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        });
+
+        animator.start();
     }
 }
