@@ -69,10 +69,10 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
      *
      * @param view View
      */
-    private void showView(View view) {
+    private void showView(final View view) {
         mShowing = true;
         ViewPropertyAnimator animator = view.animate()
-                .translationY(view.getHeight())
+                .translationY(0)
                 .setInterpolator(INTERPOLATOR)
                 .setDuration(200);
 
@@ -80,21 +80,20 @@ public class QuickReturnFooterBehavior extends CoordinatorLayout.Behavior<View> 
 
             @Override
             public void onAnimationStart(Animator animator) {
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animator animator) {
-                mHiding = false;
                 view.setVisibility(View.VISIBLE);
             }
 
             @Override
+            public void onAnimationEnd(Animator animator) {
+                mShowing = false;
+            }
+
+            @Override
             public void onAnimationCancel(Animator animator) {
-                // 취소되면 다시 보여준다.
-                mHiding = false;
-                if (!mShowing)
-                    showView(view);
+                // 취소되면 다시 숨김
+                mShowing = false;
+                if (!mHiding)
+                    hideView(view);
             }
 
             @Override
